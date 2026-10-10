@@ -14,7 +14,7 @@ h1{font:400 28px Georgia,serif;margin:0}
 .chip{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 12px;font-size:14px}
 .chip b{display:block;font-size:18px;color:var(--acc)}
 nav{display:flex;gap:6px;margin:12px 0;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding:6px 0}
-nav button{flex:1;padding:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;font-size:15px;cursor:pointer}
+nav button{flex:1;padding:10px 2px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;font-size:13px;cursor:pointer}
 nav button.on{background:var(--acc);color:var(--accfg);border-color:var(--acc)}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
 .card h3{margin:0 0 4px;font-size:18px}
@@ -31,15 +31,15 @@ input[type=range]{padding:0}
 .mod .card{width:100%;max-width:440px;margin:0}
 .line{display:flex;justify-content:space-between;padding:4px 0}
 .tot{border-top:1px solid var(--line);margin-top:6px;padding-top:8px;font-weight:700}
-#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--acc);color:var(--accfg);padding:10px 16px;border-radius:99px;display:none}
+.fl{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}.fl button{padding:6px 12px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;font-size:14px;cursor:pointer}.fl button.on{background:var(--acc);color:var(--accfg);border-color:var(--acc)}.big{font:400 28px Georgia,serif;color:var(--acc)}.g{display:grid;grid-template-columns:1fr 1fr;gap:12px}.g .card{margin:0}#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--acc);color:var(--accfg);padding:10px 16px;border-radius:99px;display:none}
 </style></head><body><div class="w">
 <div class="top"><div><h1>SurplusX</h1><div class="mut">Prototype demo · Chennai pilot cluster · 1 credit = ₹1</div></div>
 <div class="bal"><div class="chip">Credits<b id="cr"></b></div><div class="chip">Cash<b id="cash"></b></div></div></div>
-<nav><button data-t="browse">Browse</button><button data-t="sell">Sell surplus</button><button data-t="wallet">Wallet</button></nav>
+<nav><button data-t="browse">Browse</button><button data-t="sell">Sell</button><button data-t="trade">Trade-in</button><button data-t="wallet">Wallet</button><button data-t="stats">Insights</button></nav>
 <div id="v"></div></div><div id="m"></div><div id="toast"></div>
 <script>
 const $=s=>document.querySelector(s),R=n=>'₹'+Math.round(n).toLocaleString('en-IN'),FEE=0.03;
-const S={cr:5000,cash:20000,tab:'browse',id:6,h:[],l:[
+const S={cr:5000,cash:20000,tab:'browse',id:6,f:'All',q:'',n:0,gmv:0,fees:0,circ:0,h:[],l:[
 {id:1,t:'Banner & flyer printing (500 pcs)',s:'Anna Nagar Print House',c:'Printing',p:6000,sh:75},
 {id:2,t:'Event hall, weekday (4 hrs)',s:'Marina Banquets',c:'Hospitality',p:15000,sh:50},
 {id:3,t:'Social media pack (12 posts)',s:'PixelNest Studio',c:'Design',p:8000,sh:100},
@@ -49,7 +49,7 @@ const esc=x=>{const d=document.createElement('div');d.textContent=x;return d.inn
 function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',2200)}
 function head(){$('#cr').textContent=S.cr.toLocaleString('en-IN');$('#cash').textContent=R(S.cash);
 document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===S.tab))}
-function browse(){return S.l.map(x=>`<div class="card"><div class="row"><div><h3>${esc(x.t)}</h3><div class="mut">${esc(x.s)} <span class="ok">✔ Verified</span></div></div><div><b>${R(x.p)}</b></div></div>
+function browse(){const cats=['All',...new Set(S.l.map(x=>x.c))],L=S.l.filter(x=>(S.f==='All'||x.c===S.f)&&x.t.toLowerCase().includes(S.q.toLowerCase()));return `<input id="q" placeholder="Search listings"><div class="fl">${cats.map(c=>`<button data-f="${c}" class="${S.f===c?'on':''}">${c}</button>`).join('')}</div>`+(L.length?'':'<div class="mut">Nothing matches.</div>')+L.map(x=>`<div class="card"><div class="row"><div><h3>${esc(x.t)}</h3><div class="mut">${esc(x.s)} <span class="ok">✔ Verified · ★ ${(4.5+x.id%5/10).toFixed(1)}</span></div></div><div><b>${R(x.p)}</b></div></div>
 <div class="row" style="margin-top:10px"><div><span class="tag">${esc(x.c)}</span><span class="tag">Up to ${x.sh}% in credits</span></div>
 ${x.own?`<button class="btn alt" data-sim="${x.id}">Simulate a buyer</button>`:`<button class="btn" data-buy="${x.id}">Buy</button>`}</div></div>`).join('')}
 function sell(){return `<div class="card"><h3>List your surplus</h3><div class="mut" style="margin-bottom:12px">Unsold stock or idle capacity. Buyers pay part in credits, part in cash.</div>
@@ -59,9 +59,9 @@ function sell(){return `<div class="card"><h3>List your surplus</h3><div class="
 <label>Accept credits up to<select id="f4"><option>50</option><option>75</option><option>100</option></select></label>
 <button class="btn" id="add">Publish listing</button></div>`}
 function wallet(){return `<div class="card"><h3>Wallet</h3><div class="line"><span>Credits</span><b>${S.cr.toLocaleString('en-IN')}</b></div><div class="line"><span>Cash</span><b>${R(S.cash)}</b></div>
-<div class="mut" style="margin-top:8px">Credit cash-out is limited during the pilot to keep the network liquid. Platform fee: 3% per trade, paid in cash.</div></div>
+<div class="mut" style="margin-top:8px">Credit cash-out is limited during the pilot to keep the network liquid. Platform fee: 3% per trade, paid in cash.</div><button class="btn alt" id="rs" style="margin-top:12px">Reset demo</button></div>
 <div class="card"><h3>History</h3>${S.h.length?S.h.map(x=>`<div class="line"><span>${esc(x.a)}</span><span class="mut">${esc(x.b)}</span></div>`).join(''):'<div class="mut">No trades yet. Buy something or list your surplus.</div>'}</div>`}
-function draw(){head();$('#v').innerHTML=S.tab==='browse'?browse():S.tab==='sell'?sell():wallet()}
+const TI={Smartphone:12000,Laptop:25000,Television:15000,'Clothes lot (20 pcs)':3000},CO={'Like new':.7,Good:.5,Fair:.3},offer=()=>Math.round(TI[$('#ti').value]*CO[$('#co').value]);function trade(){return `<div class="card"><h3>Trade-in estimator</h3><div class="mut" style="margin-bottom:12px">Part-exchange toward any purchase. Instant offer, paid as credits.</div><label>Item<select id="ti">${Object.keys(TI).map(k=>`<option>${k}</option>`).join('')}</select></label><label>Condition<select id="co">${Object.keys(CO).map(k=>`<option>${k}</option>`).join('')}</select></label><div class="big" id="of"></div><div class="mut" style="margin:6px 0 12px">Sample base values, not real pricing.</div><button class="btn" id="tk">Accept offer</button></div>`}function stats(){return `<div class="g">${[['Trades',S.n],['Trade value',R(S.gmv)],['Credits circulated',S.circ.toLocaleString('en-IN')],['Fees earned (cash)',R(S.fees)]].map(a=>`<div class="card"><div class="mut">${a[0]}</div><div class="big">${a[1]}</div></div>`).join('')}</div><div class="mut" style="margin-top:12px">Live from this session. Do a trade and watch it update. This is the business model in action: a 3% fee collected in cash on every trade.</div>`}function draw(){head();const T=S.tab;$('#v').innerHTML=T==='browse'?browse():T==='sell'?sell():T==='trade'?trade():T==='stats'?stats():wallet();if(T==='browse')$('#q').value=S.q;if(T==='trade'){const u=()=>$('#of').textContent=R(offer())+' in credits';u();$('#ti').onchange=u;$('#co').onchange=u}}
 function modal(x){const max=Math.min(S.cr,Math.floor(x.p*x.sh/100));
 $('#m').innerHTML=`<div class="mod"><div class="card"><h3>${esc(x.t)}</h3><div class="mut">${esc(x.s)}</div><div style="margin-top:12px">Pay with credits: <b id="cv"></b></div>
 <input type="range" id="sl" min="0" max="${max}" step="50" value="${max}"><div class="line"><span>Item price</span><span>${R(x.p)}</span></div>
@@ -71,12 +71,13 @@ $('#m').innerHTML=`<div class="mod"><div class="card"><h3>${esc(x.t)}</h3><div c
 const up=()=>{const c=+$('#sl').value,due=x.p-c+x.p*FEE;$('#cv').textContent=c;$('#a').textContent='− '+c;$('#d').textContent=R(due);
 const bad=due>S.cash;$('#go').disabled=bad;$('#w').textContent=bad?'Not enough cash. Use more credits or top up.':''};
 up();$('#sl').oninput=up;$('#x').onclick=()=>$('#m').innerHTML='';
-$('#go').onclick=()=>{const c=+$('#sl').value,due=x.p-c+x.p*FEE;S.cr-=c;S.cash-=due;S.h.unshift({a:'Bought: '+x.t,b:`−${c} cr, −${R(due)}`});$('#m').innerHTML='';draw();toast('Trade complete ✔')}}
+$('#go').onclick=()=>{const c=+$('#sl').value,due=x.p-c+x.p*FEE;S.cr-=c;S.cash-=due;S.n++;S.gmv+=x.p;S.circ+=c;S.fees+=x.p*FEE;S.h.unshift({a:'Bought: '+x.t,b:`−${c} cr, −${R(due)}`});$('#m').innerHTML='';draw();toast('Trade complete ✔')}}
 document.addEventListener('click',e=>{const t=e.target,d=t.dataset;
-if(d.t){S.tab=d.t;draw()}
+if(d.t){S.tab=d.t;draw()}if(d.f){S.f=d.f;draw()}if(t.id==='tk'){const o=offer();S.cr+=o;S.circ+=o;S.h.unshift({a:'Trade-in: '+$('#ti').value,b:'+'+o+' cr'});draw();toast('Trade-in accepted: +'+o+' credits')}if(t.id==='rs')location.reload();
 if(d.buy)modal(S.l.find(x=>x.id==d.buy));
-if(d.sim){const x=S.l.find(y=>y.id==d.sim),c=Math.round(x.p*x.sh/100);S.cr+=c;S.cash+=x.p-c;S.h.unshift({a:'Sold: '+x.t,b:`+${c} cr, +${R(x.p-c)}`});S.l=S.l.filter(y=>y!==x);draw();toast('A member bought your listing')}
+if(d.sim){const x=S.l.find(y=>y.id==d.sim),c=Math.round(x.p*x.sh/100);S.cr+=c;S.cash+=x.p-c;S.n++;S.gmv+=x.p;S.circ+=c;S.fees+=x.p*FEE;S.h.unshift({a:'Sold: '+x.t,b:`+${c} cr, +${R(x.p-c)}`});S.l=S.l.filter(y=>y!==x);draw();toast('A member bought your listing')}
 if(t.id==='add'){const n=$('#f1').value.trim(),p=+$('#f3').value;if(!n||p<100){toast('Add a name and a price');return}
 S.l.unshift({id:S.id++,t:n,s:'Your business',c:$('#f2').value,p:p,sh:+$('#f4').value,own:1});S.tab='browse';draw();toast('Listing published')}});
+document.addEventListener('input',e=>{if(e.target.id==='q'){S.q=e.target.value;draw();const q=$('#q');q.focus();q.setSelectionRange(q.value.length,q.value.length)}});
 draw();
 </script></body></html>

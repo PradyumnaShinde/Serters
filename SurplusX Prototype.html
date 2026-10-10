@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>SurplusX Prototype</title>
+<style>
+:root{--bg:#f6f3ec;--card:#fff;--ink:#14202b;--mut:#5b6670;--acc:#0f766e;--accfg:#fff;--amb:#b45309;--line:#ddd8cc;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14202b;--card:#1c2b38;--ink:#f6f3ec;--mut:#a9b4bd;--acc:#2dd4bf;--accfg:#10202b;--amb:#f0a43a;--line:#2c3d4b}}
+:root[data-theme="dark"]{--bg:#14202b;--card:#1c2b38;--ink:#f6f3ec;--mut:#a9b4bd;--acc:#2dd4bf;--accfg:#10202b;--amb:#f0a43a;--line:#2c3d4b}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*:before,*:after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 Helvetica,Arial,sans-serif}
+.w{max-width:760px;margin:0 auto;padding:16px}
+h1{font:400 28px Georgia,serif;margin:0}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.bal{display:flex;gap:8px}
+.chip{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 12px;font-size:14px}
+.chip b{display:block;font-size:18px;color:var(--acc)}
+nav{display:flex;gap:6px;margin:12px 0;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding:6px 0}
+nav button{flex:1;padding:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;font-size:15px;cursor:pointer}
+nav button.on{background:var(--acc);color:var(--accfg);border-color:var(--acc)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+.card h3{margin:0 0 4px;font-size:18px}
+.mut{color:var(--mut);font-size:14px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.tag{display:inline-block;font-size:12px;border:1px solid var(--line);border-radius:99px;padding:2px 8px;color:var(--mut);margin-right:4px}
+.ok{color:var(--acc)}
+.btn{background:var(--acc);color:var(--accfg);border:0;border-radius:10px;padding:10px 16px;font-size:15px;cursor:pointer}
+.btn.alt{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+input,select{width:100%;padding:10px;margin:4px 0 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font-size:16px}
+input[type=range]{padding:0}
+.mod{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+.mod .card{width:100%;max-width:440px;margin:0}
+.line{display:flex;justify-content:space-between;padding:4px 0}
+.tot{border-top:1px solid var(--line);margin-top:6px;padding-top:8px;font-weight:700}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--acc);color:var(--accfg);padding:10px 16px;border-radius:99px;display:none}
+</style></head><body><div class="w">
+<div class="top"><div><h1>SurplusX</h1><div class="mut">Prototype demo · Chennai pilot cluster · 1 credit = ₹1</div></div>
+<div class="bal"><div class="chip">Credits<b id="cr"></b></div><div class="chip">Cash<b id="cash"></b></div></div></div>
+<nav><button data-t="browse">Browse</button><button data-t="sell">Sell surplus</button><button data-t="wallet">Wallet</button></nav>
+<div id="v"></div></div><div id="m"></div><div id="toast"></div>
+<script>
+const $=s=>document.querySelector(s),R=n=>'₹'+Math.round(n).toLocaleString('en-IN'),FEE=0.03;
+const S={cr:5000,cash:20000,tab:'browse',id:6,h:[],l:[
+{id:1,t:'Banner & flyer printing (500 pcs)',s:'Anna Nagar Print House',c:'Printing',p:6000,sh:75},
+{id:2,t:'Event hall, weekday (4 hrs)',s:'Marina Banquets',c:'Hospitality',p:15000,sh:50},
+{id:3,t:'Social media pack (12 posts)',s:'PixelNest Studio',c:'Design',p:8000,sh:100},
+{id:4,t:'Surplus bedsheets (10 sets)',s:'Kumar Textiles',c:'Retail',p:9000,sh:60},
+{id:5,t:'Catering for 30 guests',s:'Spice Route Kitchen',c:'Food',p:12000,sh:50}]};
+const esc=x=>{const d=document.createElement('div');d.textContent=x;return d.innerHTML};
+function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',2200)}
+function head(){$('#cr').textContent=S.cr.toLocaleString('en-IN');$('#cash').textContent=R(S.cash);
+document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===S.tab))}
+function browse(){return S.l.map(x=>`<div class="card"><div class="row"><div><h3>${esc(x.t)}</h3><div class="mut">${esc(x.s)} <span class="ok">✔ Verified</span></div></div><div><b>${R(x.p)}</b></div></div>
+<div class="row" style="margin-top:10px"><div><span class="tag">${esc(x.c)}</span><span class="tag">Up to ${x.sh}% in credits</span></div>
+${x.own?`<button class="btn alt" data-sim="${x.id}">Simulate a buyer</button>`:`<button class="btn" data-buy="${x.id}">Buy</button>`}</div></div>`).join('')}
+function sell(){return `<div class="card"><h3>List your surplus</h3><div class="mut" style="margin-bottom:12px">Unsold stock or idle capacity. Buyers pay part in credits, part in cash.</div>
+<label>What are you offering?<input id="f1" placeholder="e.g. Weekend studio hours"></label>
+<label>Category<select id="f2"><option>Retail</option><option>Printing</option><option>Design</option><option>Hospitality</option><option>Food</option><option>Services</option></select></label>
+<label>Price (₹)<input id="f3" type="number" min="100" placeholder="5000"></label>
+<label>Accept credits up to<select id="f4"><option>50</option><option>75</option><option>100</option></select></label>
+<button class="btn" id="add">Publish listing</button></div>`}
+function wallet(){return `<div class="card"><h3>Wallet</h3><div class="line"><span>Credits</span><b>${S.cr.toLocaleString('en-IN')}</b></div><div class="line"><span>Cash</span><b>${R(S.cash)}</b></div>
+<div class="mut" style="margin-top:8px">Credit cash-out is limited during the pilot to keep the network liquid. Platform fee: 3% per trade, paid in cash.</div></div>
+<div class="card"><h3>History</h3>${S.h.length?S.h.map(x=>`<div class="line"><span>${esc(x.a)}</span><span class="mut">${esc(x.b)}</span></div>`).join(''):'<div class="mut">No trades yet. Buy something or list your surplus.</div>'}</div>`}
+function draw(){head();$('#v').innerHTML=S.tab==='browse'?browse():S.tab==='sell'?sell():wallet()}
+function modal(x){const max=Math.min(S.cr,Math.floor(x.p*x.sh/100));
+$('#m').innerHTML=`<div class="mod"><div class="card"><h3>${esc(x.t)}</h3><div class="mut">${esc(x.s)}</div><div style="margin-top:12px">Pay with credits: <b id="cv"></b></div>
+<input type="range" id="sl" min="0" max="${max}" step="50" value="${max}"><div class="line"><span>Item price</span><span>${R(x.p)}</span></div>
+<div class="line"><span>Credits applied</span><span id="a"></span></div><div class="line"><span>Platform fee (3%)</span><span>${R(x.p*FEE)}</span></div>
+<div class="line tot"><span>Cash to pay</span><span id="d"></span></div><div class="mut" id="w"></div>
+<div class="row" style="margin-top:12px"><button class="btn alt" id="x">Cancel</button><button class="btn" id="go">Confirm trade</button></div></div></div>`;
+const up=()=>{const c=+$('#sl').value,due=x.p-c+x.p*FEE;$('#cv').textContent=c;$('#a').textContent='− '+c;$('#d').textContent=R(due);
+const bad=due>S.cash;$('#go').disabled=bad;$('#w').textContent=bad?'Not enough cash. Use more credits or top up.':''};
+up();$('#sl').oninput=up;$('#x').onclick=()=>$('#m').innerHTML='';
+$('#go').onclick=()=>{const c=+$('#sl').value,due=x.p-c+x.p*FEE;S.cr-=c;S.cash-=due;S.h.unshift({a:'Bought: '+x.t,b:`−${c} cr, −${R(due)}`});$('#m').innerHTML='';draw();toast('Trade complete ✔')}}
+document.addEventListener('click',e=>{const t=e.target,d=t.dataset;
+if(d.t){S.tab=d.t;draw()}
+if(d.buy)modal(S.l.find(x=>x.id==d.buy));
+if(d.sim){const x=S.l.find(y=>y.id==d.sim),c=Math.round(x.p*x.sh/100);S.cr+=c;S.cash+=x.p-c;S.h.unshift({a:'Sold: '+x.t,b:`+${c} cr, +${R(x.p-c)}`});S.l=S.l.filter(y=>y!==x);draw();toast('A member bought your listing')}
+if(t.id==='add'){const n=$('#f1').value.trim(),p=+$('#f3').value;if(!n||p<100){toast('Add a name and a price');return}
+S.l.unshift({id:S.id++,t:n,s:'Your business',c:$('#f2').value,p:p,sh:+$('#f4').value,own:1});S.tab='browse';draw();toast('Listing published')}});
+draw();
+</script></body></html>
